@@ -9,6 +9,7 @@ using PProf
 struct DDConfig
     host::String
     port::Int
+    hostname::String
     api_key::String
 end
 
@@ -37,10 +38,14 @@ function upload(config::DDConfig, profile::SerializedProfile)
     name = "$(profile.type).pprof"
     body = HTTP.Form([
         "version" => "3",
+        "family" => "go",
         "start" => Dates.format(profile.start, ISODateTimeFormat),
         "end" => Dates.format(profile.finish, ISODateTimeFormat),
-        "family" => "julia",
-        # tags[]
+        "tags[]" => "host:$(config.hostname)",
+        "tags[]" => "runtime:go",
+        "tags[]" => "env:example",
+        "tags[]" => "service:julia-test", # TODO: parameterize
+        "tags[]" => "version:1.0", # TODO: parameterize
         "data[$(name)]" => HTTP.Multipart(
             "pprof-data",
             open(profile.proto_path), # proto
