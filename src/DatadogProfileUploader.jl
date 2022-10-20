@@ -10,7 +10,6 @@ struct DDConfig
     host::String
     port::Int
     hostname::String
-    api_key::String
 end
 
 struct SerializedProfile
@@ -23,20 +22,21 @@ end
 function profile_and_upload(config, f)
     Profile.clear()
     start = now()
+    println("taking profile")
     Profile.@profile f()
+    println("done taking profile")
     finish = now()
 
     path = "profile.pb.gz" # TODO: temp file?
     pprof(; web=false, out=path)
-    upload(config, SerializedProfile(start, finish, "cpu", path))
+    # upload(config, SerializedProfile(start, finish, "cpu", path))
+    upload(config, SerializedProfile(start, finish, "cpu", "../go-profile.pb"))
 end
 
 function upload(config::DDConfig, profile::SerializedProfile)
     @info "uploading"
     # do HTTP request
-    headers = [
-        "DD-API-KEY" => config.api_key,
-    ]
+    headers = []
     name = "$(profile.type).pprof"
     keys = Pair{String,Any}[
         "version" => "3",
@@ -56,8 +56,8 @@ function upload(config::DDConfig, profile::SerializedProfile)
         "application/octet-stream"
     ))
     body = HTTP.Form(keys)
-    url = "https://intake.profile.datadoghq.com/v1/input"
-    println("posting to URL")
+    url = "http://localhost:8126/profiling/v1/input"
+    println("posting to $url")
     resp = HTTP.post(url, headers, body)
     println("got response ", resp)
 end
