@@ -30,7 +30,7 @@ function profile_and_upload(config, f)
     path = "profile.pb.gz" # TODO: temp file?
     #pprof(; web=false, out=path)
     # upload(config, SerializedProfile(start, finish, "cpu", path))
-    upload(config, SerializedProfile(start, finish, "cpu", "../testdata/profile-julia-doctored.pb.gz"))
+    upload(config, SerializedProfile(start, finish, "cpu", "../testdata/cpu.pprof.gz"))
 end
 
 const ExpectedDateFormat = DateFormat("yyyy-mm-dd\\THH:MM:SSZ")
@@ -73,7 +73,6 @@ function upload(config::DDConfig, profile::SerializedProfile)
             "application/octet-stream"
         ),
     ]
-    println(parts)
     body = HTTP.Form(parts)
     url = "http://localhost:8126/profiling/v1/input"
     println("posting to $url")
