@@ -33,21 +33,31 @@ function profile_and_upload(config, f)
     upload(config, SerializedProfile(start, finish, "cpu", "../profile-julia-doctored.pb.gz"))
 end
 
+const ExpectedDateFormat = DateFormat("yyyy-mm-dd\\THH:MM:SSZ")
+
 function upload(config::DDConfig, profile::SerializedProfile)
     @info "uploading"
     # do HTTP request
-    headers = []
     name = "$(profile.type).pprof"
     parts = Pair{String,Any}[
         "version" => "3",
         "family" => "go",
-        "start" => Dates.format(profile.start, ISODateTimeFormat),
-        "end" => Dates.format(profile.finish, ISODateTimeFormat),
+        "start" => Dates.format(profile.start, ExpectedDateFormat),
+        "end" => Dates.format(profile.finish, ExpectedDateFormat),
+        
         "tags[]" => "host:$(config.hostname)",
         "tags[]" => "runtime:go",
+        "tags[]" => "pid:60677",
+        "tags[]" => "profiler_version:v1.36.0",
+        "tags[]" => "runtime_version:1.18.3",
+        "tags[]" => "runtime_compiler:gc",
+        "tags[]" => "runtime_arch:amd64",
+        "tags[]" => "runtime_os:darwin",
+        "tags[]" => "runtime-id:d9b59eb6-d5f7-4534-ae82-793f29397",
+        "tags[]" => "version:1.0",
+        "tags[]" => "service:go-sorter",
         "tags[]" => "env:example",
-        "tags[]" => "service:julia-test", # TODO: parameterize
-        "tags[]" => "version:1.0", # TODO: parameterize
+        
         # other stuff
         "data[metrics.json]" => HTTP.Multipart(
             "pprof-data",
@@ -64,7 +74,7 @@ function upload(config::DDConfig, profile::SerializedProfile)
     body = HTTP.Form(parts)
     url = "http://localhost:8126/profiling/v1/input"
     println("posting to $url")
-    resp = HTTP.post(url, headers, body)
+    resp = HTTP.post(url, [], body)
     println("got response ", resp)
 end
 
