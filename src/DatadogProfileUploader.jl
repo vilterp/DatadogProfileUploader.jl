@@ -30,13 +30,16 @@ function profile_and_upload(config, f)
     path = "profile.pb.gz" # TODO: temp file?
     #pprof(; web=false, out=path)
     # upload(config, SerializedProfile(start, finish, "cpu", path))
-    upload(config, SerializedProfile(start, finish, "cpu", "../profile-julia-doctored.pb.gz"))
+    upload(config, SerializedProfile(start, finish, "cpu", "../testdata/profile-julia-doctored.pb.gz"))
 end
 
 const ExpectedDateFormat = DateFormat("yyyy-mm-dd\\THH:MM:SSZ")
 
 function upload(config::DDConfig, profile::SerializedProfile)
-    @info "uploading"
+    headers = [
+        "User-Agent" => "Go-http-client/1.1",
+    ]
+    
     # do HTTP request
     name = "$(profile.type).pprof"
     parts = Pair{String,Any}[
@@ -74,7 +77,7 @@ function upload(config::DDConfig, profile::SerializedProfile)
     body = HTTP.Form(parts)
     url = "http://localhost:8126/profiling/v1/input"
     println("posting to $url")
-    resp = HTTP.post(url, [], body)
+    resp = HTTP.post(url, headers, body)
     println("got response ", resp)
 end
 

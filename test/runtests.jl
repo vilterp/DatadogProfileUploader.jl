@@ -5,6 +5,6 @@ function myfunc()
   sort(A, dims=3)
 end
 
-config = DatadogProfileUploader.DDConfig("localhost", 8126, "Petes-Relational-Macbook.local")
+config = DatadogProfileUploader.DDConfig("localhost", 8126, "petesrelmacbook.taila7a54.ts.net")
 
 DatadogProfileUploader.profile_and_upload(config, myfunc)
