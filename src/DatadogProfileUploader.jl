@@ -10,7 +10,6 @@ struct DDConfig
     host::String
     port::Int
     hostname::String
-    api_key::String
 end
 
 struct SerializedProfile
