@@ -21,6 +21,7 @@ struct SerializedProfile
 end
 
 function profile_and_upload(config, f)
+    Profile.clear()
     start = now()
     Profile.@profile f()
     finish = now()
@@ -31,12 +32,13 @@ function profile_and_upload(config, f)
 end
 
 function upload(config::DDConfig, profile::SerializedProfile)
+    @info "uploading"
     # do HTTP request
     headers = [
         "DD-API-KEY" => config.api_key,
     ]
     name = "$(profile.type).pprof"
-    body = HTTP.Form([
+    keys = Pair{String,Any}[
         "version" => "3",
         "family" => "go",
         "start" => Dates.format(profile.start, ISODateTimeFormat),
@@ -46,14 +48,18 @@ function upload(config::DDConfig, profile::SerializedProfile)
         "tags[]" => "env:example",
         "tags[]" => "service:julia-test", # TODO: parameterize
         "tags[]" => "version:1.0", # TODO: parameterize
-        "data[$(name)]" => HTTP.Multipart(
-            "pprof-data",
-            open(profile.proto_path), # proto
-            "application/octet-stream"
-        ),
-    ])
-    url = "http://$(config.host):$(config.port)/profiling/v1/input"
-    HTTP.post(url, headers, body)
+    ]
+    println(keys)
+    push!(keys, "data[$(name)]" => HTTP.Multipart(
+        "pprof-data",
+        open(profile.proto_path), # proto
+        "application/octet-stream"
+    ))
+    body = HTTP.Form(keys)
+    url = "https://intake.profile.datadoghq.com/v1/input"
+    println("posting to URL")
+    resp = HTTP.post(url, headers, body)
+    println("got response ", resp)
 end
 
 end # module
