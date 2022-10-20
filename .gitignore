@@ -1,2 +1,3 @@
 .vscode
 *.pb.gz
+testdata
