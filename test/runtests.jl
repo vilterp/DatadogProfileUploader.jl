@@ -9,6 +9,7 @@ config = DatadogProfileUploader.DDConfig(
   "localhost",
   8126,
   "petesrelmacbook.taila7a54.ts.net",
+  ENV["DD_API_KEY"],
 )
 
 DatadogProfileUploader.profile_and_upload(config, myfunc)

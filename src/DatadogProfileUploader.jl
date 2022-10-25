@@ -10,6 +10,7 @@ struct DDConfig
     host::String
     port::Int
     hostname::String
+    api_key::String
 end
 
 struct SerializedProfile
@@ -25,15 +26,21 @@ function profile_and_upload(config, f)
     Profile.@profile f()
     finish = now()
     
-    path, io = mktemp()
-
-    pprof(; web=false, out=path)
-    upload(config, SerializedProfile(start, finish, "cpu", path))
+    path = "profile-$(now()).pb.gz"
+    try
+        pprof(; web=false, out=path)
+        upload(config, SerializedProfile(start, finish, "cpu", path))
+    finally
+        rm(path)
+    end
 end
 
 const ExpectedDateFormat = DateFormat("yyyy-mm-dd\\THH:MM:SSZ")
 
 function upload(config::DDConfig, profile::SerializedProfile)
+    headers = [
+        "DD-API-KEY" => config.api_key,
+    ]
     # do HTTP request
     profile_name = "$(profile.type).pprof"
     parts = Pair{String,Any}[
@@ -62,10 +69,10 @@ function upload(config::DDConfig, profile::SerializedProfile)
         ),
     ]
     body = HTTP.Form(parts)
-    # url = "https://intake.profile.datadoghq.com/v1/input"
-    url = "http://localhost:8126/profiling/v1/input"
+    url = "https://intake.profile.datadoghq.com/v1/input"
+    # url = "http://localhost:8126/profiling/v1/input"
     println("posting to $url")
-    resp = HTTP.post(url, [], body)
+    resp = HTTP.post(url, headers, body)
     println("got response ", resp)
 end
 
