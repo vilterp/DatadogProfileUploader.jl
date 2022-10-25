@@ -24,6 +24,8 @@ function profile_and_upload(config, f)
     start = now()
     Profile.@profile f()
     finish = now()
+    
+    path, io = mktemp()
 
     pprof(; web=false, out=path)
     upload(config, SerializedProfile(start, finish, "cpu", path))
