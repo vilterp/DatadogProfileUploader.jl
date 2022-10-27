@@ -10,6 +10,7 @@ using PProf
 Base.@kwdef struct DDConfig
     host::String = "intake.profile.datadoghq.com"
     port::Int = 443
+    path = "/v1/input"
     protocol::String = "https"
     tags::Dict{String,String} = Dict{String,String}()
     api_key::Union{String,Nothing} = nothing
@@ -74,7 +75,7 @@ function upload(config::DDConfig, profile::SerializedProfile)
     ))
     
     body = HTTP.Form(parts)
-    url = "$(config.protocol)://$(config.host):$(config.port)/v1/input"
+    url = "$(config.protocol)://$(config.host):$(config.port)$(config.path)"
     println("posting to $url")
     resp = HTTP.post(url, headers, body)
     println("got response ", resp)

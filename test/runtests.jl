@@ -32,6 +32,7 @@ agent_config = DatadogProfileUploader.DDConfig(
   host="localhost",
   port=8126,
   protocol="http",
+  path="/profiling/v1/input",
   hostname=hostname,
   tags=tags,
 )
