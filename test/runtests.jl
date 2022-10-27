@@ -6,8 +6,8 @@ function myfunc()
 end
 
 tags = Dict(
-  "service" => "julia-sorter-4",
-  "version" => "abc124",
+  "service" => "julia-sorter",
+  "version" => "abc125",
   "env" => "dev",
 )
 
@@ -29,8 +29,10 @@ direct_config = DatadogProfileUploader.DDConfig(
 )
 
 agent_config = DatadogProfileUploader.DDConfig(
+  host="localhost",
+  port=8126,
+  protocol="http",
   hostname=hostname,
-  api_key=ENV["DD_API_KEY"],
   tags=tags,
 )
 

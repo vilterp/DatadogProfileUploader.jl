@@ -12,7 +12,7 @@ Base.@kwdef struct DDConfig
     port::Int = 443
     protocol::String = "https"
     tags::Dict{String,String} = Dict{String,String}()
-    api_key::Union{String,Nothing}
+    api_key::Union{String,Nothing} = nothing
     hostname::String
 end
 
