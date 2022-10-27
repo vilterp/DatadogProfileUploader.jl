@@ -11,6 +11,7 @@ Base.@kwdef struct DDConfig
     host::String = "intake.profile.datadoghq.com"
     port::Int = 443
     protocol::String = "https"
+    tags::Dict{String,String} = Dict{String,String}()
     api_key::String
     hostname::String
 end
@@ -53,20 +54,22 @@ function upload(config::DDConfig, profile::SerializedProfile)
     profile_name = "$(profile.type).pprof"
     parts = Pair{String,Any}[
         "version" => "3",
-        "family" => "go",
+        "family" => "go", # pretending to be Go until DD has official Julia support
         "start" => string(profile.start),
         "end" => string(profile.finish),
-        
         "tags[]" => "runtime:go",
-        "tags[]" => "service:julia-sorter-2",
-        "tags[]" => "env:example",
-        
-        "data[$profile_name]" => HTTP.Multipart(
-            "pprof-data",
-            open(profile.proto_path), # proto
-            "application/octet-stream"
-        ),
     ]
+    
+    for (key, val) in config.tags
+        push!(parts, "tags[]" => "$key:$val")
+    end
+    
+    push!(parts, "data[$profile_name]" => HTTP.Multipart(
+        "pprof-data",
+        open(profile.proto_path),
+        "application/octet-stream"
+    ))
+    
     body = HTTP.Form(parts)
     url = "$(config.protocol)://$(config.host):$(config.port)/v1/input"
     println("posting to $url")

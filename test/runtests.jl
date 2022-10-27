@@ -5,17 +5,25 @@ function myfunc()
   sort(A, dims=3)
 end
 
+tags = Dict(
+  "service" => "julia-sorter-3",
+  "version" => "abc123",
+  "env" => "dev",
+)
+
 nc_config = DatadogProfileUploader.DDConfig(
-  "localhost",
-  9000,
-  "http",
-  "petesrelmacbook.taila7a54.ts.net",
-  ENV["DD_API_KEY"],
+  host="localhost",
+  port=9000,
+  protocol="http",
+  hostname="petesrelmacbook.taila7a54.ts.net",
+  api_key=ENV["DD_API_KEY"],
+  tags=tags,
 )
 
 direct_config = DatadogProfileUploader.DDConfig(
   hostname="petesrelmacbook.taila7a54.ts.net",
   api_key=ENV["DD_API_KEY"],
+  tags=tags,
 )
 
 DatadogProfileUploader.upload_file_on_disk(direct_config, "./cpu.pprof")
