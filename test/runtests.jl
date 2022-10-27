@@ -12,4 +12,4 @@ config = DatadogProfileUploader.DDConfig(
   ENV["DD_API_KEY"],
 )
 
-DatadogProfileUploader.profile_and_upload(config, myfunc)
+DatadogProfileUploader.upload_file_on_disk(config, "./cpu.pprof")

@@ -20,6 +20,12 @@ struct SerializedProfile
     proto_path::String
 end
 
+function upload_file_on_disk(config, path)
+    start = now()
+    finish = now() + Dates.Minute(1)
+    upload(config, SerializedProfile(start, finish, "cpu", path))
+end
+
 function profile_and_upload(config, f)
     Profile.clear()
     start = now()
@@ -49,16 +55,7 @@ function upload(config::DDConfig, profile::SerializedProfile)
         "start" => Dates.format(profile.start, ExpectedDateFormat),
         "end" => Dates.format(profile.finish, ExpectedDateFormat),
         
-        "tags[]" => "host:$(config.hostname)",
         "tags[]" => "runtime:go",
-        "tags[]" => "pid:60677",
-        "tags[]" => "profiler_version:v1.36.0",
-        "tags[]" => "runtime_version:1.18.3",
-        "tags[]" => "runtime_compiler:gc",
-        "tags[]" => "runtime_arch:amd64",
-        "tags[]" => "runtime_os:darwin",
-        "tags[]" => "runtime-id:d9b59eb6-d5f7-4534-ae82-793f29397",
-        "tags[]" => "version:1.0",
         "tags[]" => "service:julia-sorter",
         "tags[]" => "env:example",
         
@@ -71,6 +68,7 @@ function upload(config::DDConfig, profile::SerializedProfile)
     body = HTTP.Form(parts)
     url = "https://intake.profile.datadoghq.com/v1/input"
     # url = "http://localhost:8126/profiling/v1/input"
+    # url = "http://localhost:9000/v1/input"
     println("posting to $url")
     resp = HTTP.post(url, headers, body)
     println("got response ", resp)
