@@ -3,6 +3,7 @@ module DatadogProfileUploader
 import HTTP
 
 using Dates
+using TimeZones
 using Profile
 using PProf
 
@@ -15,23 +16,25 @@ Base.@kwdef struct DDConfig
 end
 
 struct SerializedProfile
-    start::DateTime
-    finish::DateTime
+    # API expects zoned datetimes
+    start::ZonedDateTime
+    finish::ZonedDateTime
     type::String # "heap" or "cpu"
     proto_path::String
 end
 
 function upload_file_on_disk(config, path)
-    start = now()
-    finish = now() + Dates.Minute(1)
+    local_now = now(localzone())
+    start = local_now
+    finish = local_now + Dates.Minute(1)
     upload(config, SerializedProfile(start, finish, "cpu", path))
 end
 
 function profile_and_upload(config, f)
     Profile.clear()
-    start = now()
+    start = now(localzone())
     Profile.@profile f()
-    finish = now()
+    finish = now(localzone())
     
     path = "profile-$(now()).pb.gz"
     try
@@ -42,8 +45,6 @@ function profile_and_upload(config, f)
     end
 end
 
-const ExpectedDateFormat = DateFormat("yyyy-mm-dd\\THH:MM:SSZ")
-
 function upload(config::DDConfig, profile::SerializedProfile)
     headers = [
         "DD-API-KEY" => config.api_key,
@@ -53,13 +54,11 @@ function upload(config::DDConfig, profile::SerializedProfile)
     parts = Pair{String,Any}[
         "version" => "3",
         "family" => "go",
-        # "start" => Dates.format(profile.start, ExpectedDateFormat),
-        "start" => "2022-10-27T23:54:24+02:00",
-        # "end" => Dates.format(profile.finish, ExpectedDateFormat),
-        "end" => "2022-10-27T23:55:24+02:00",
+        "start" => string(profile.start),
+        "end" => string(profile.finish),
         
         "tags[]" => "runtime:go",
-        "tags[]" => "service:julia-sorter",
+        "tags[]" => "service:julia-sorter-2",
         "tags[]" => "env:example",
         
         "data[$profile_name]" => HTTP.Multipart(
