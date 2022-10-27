@@ -11,19 +11,27 @@ tags = Dict(
   "env" => "dev",
 )
 
+hostname = "petesrelmacbook.taila7a54.ts.net"
+
 nc_config = DatadogProfileUploader.DDConfig(
   host="localhost",
   port=9000,
   protocol="http",
-  hostname="petesrelmacbook.taila7a54.ts.net",
+  hostname=hostname,
   api_key=ENV["DD_API_KEY"],
   tags=tags,
 )
 
 direct_config = DatadogProfileUploader.DDConfig(
-  hostname="petesrelmacbook.taila7a54.ts.net",
+  hostname=hostname,
   api_key=ENV["DD_API_KEY"],
   tags=tags,
 )
 
-DatadogProfileUploader.upload_file_on_disk(direct_config, "./cpu.pprof")
+agent_config = DatadogProfileUploader.DDConfig(
+  hostname=hostname,
+  api_key=ENV["DD_API_KEY"],
+  tags=tags,
+)
+
+DatadogProfileUploader.upload_file_on_disk(agent_config, "./cpu.pprof")

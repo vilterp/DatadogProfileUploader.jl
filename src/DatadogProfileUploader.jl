@@ -12,7 +12,7 @@ Base.@kwdef struct DDConfig
     port::Int = 443
     protocol::String = "https"
     tags::Dict{String,String} = Dict{String,String}()
-    api_key::String
+    api_key::Union{String,Nothing}
     hostname::String
 end
 
@@ -47,9 +47,10 @@ function profile_and_upload(config, f)
 end
 
 function upload(config::DDConfig, profile::SerializedProfile)
-    headers = [
-        "DD-API-KEY" => config.api_key,
-    ]
+    headers = []
+    if config.api_key != nothing
+        push!(headers, "DD-API-KEY" => config.api_key)
+    end
     # do HTTP request
     profile_name = "$(profile.type).pprof"
     parts = Pair{String,Any}[
