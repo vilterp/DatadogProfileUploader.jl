@@ -22,6 +22,8 @@ nc_config = DatadogProfileUploader.DDConfig(
   tags=tags,
 )
 
+# TODO: encapsulate these in hellper functions
+
 direct_config = DatadogProfileUploader.DDConfig(
   hostname=hostname,
   api_key=ENV["DD_API_KEY"],
