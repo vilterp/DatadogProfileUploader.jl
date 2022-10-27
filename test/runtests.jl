@@ -5,11 +5,17 @@ function myfunc()
   sort(A, dims=3)
 end
 
-config = DatadogProfileUploader.DDConfig(
+nc_config = DatadogProfileUploader.DDConfig(
   "localhost",
-  8126,
+  9000,
+  "http",
   "petesrelmacbook.taila7a54.ts.net",
   ENV["DD_API_KEY"],
 )
 
-DatadogProfileUploader.upload_file_on_disk(config, "./cpu.pprof")
+direct_config = DatadogProfileUploader.DDConfig(
+  hostname="petesrelmacbook.taila7a54.ts.net",
+  api_key=ENV["DD_API_KEY"],
+)
+
+DatadogProfileUploader.upload_file_on_disk(direct_config, "./cpu.pprof")

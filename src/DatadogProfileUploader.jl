@@ -6,11 +6,12 @@ using Dates
 using Profile
 using PProf
 
-struct DDConfig
-    host::String
-    port::Int
-    hostname::String
+Base.@kwdef struct DDConfig
+    host::String = "intake.profile.datadoghq.com"
+    port::Int = 443
+    protocol::String = "https"
     api_key::String
+    hostname::String
 end
 
 struct SerializedProfile
@@ -52,8 +53,10 @@ function upload(config::DDConfig, profile::SerializedProfile)
     parts = Pair{String,Any}[
         "version" => "3",
         "family" => "go",
-        "start" => Dates.format(profile.start, ExpectedDateFormat),
-        "end" => Dates.format(profile.finish, ExpectedDateFormat),
+        # "start" => Dates.format(profile.start, ExpectedDateFormat),
+        "start" => "2022-10-27T23:54:24+02:00",
+        # "end" => Dates.format(profile.finish, ExpectedDateFormat),
+        "end" => "2022-10-27T23:55:24+02:00",
         
         "tags[]" => "runtime:go",
         "tags[]" => "service:julia-sorter",
@@ -66,9 +69,7 @@ function upload(config::DDConfig, profile::SerializedProfile)
         ),
     ]
     body = HTTP.Form(parts)
-    url = "https://intake.profile.datadoghq.com/v1/input"
-    # url = "http://localhost:8126/profiling/v1/input"
-    # url = "http://localhost:9000/v1/input"
+    url = "$(config.protocol)://$(config.host):$(config.port)/v1/input"
     println("posting to $url")
     resp = HTTP.post(url, headers, body)
     println("got response ", resp)
