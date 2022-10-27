@@ -32,12 +32,14 @@ function upload_file_on_disk(config, path)
 end
 
 function profile_and_upload(config, f)
+    @info "starting CPU profile"
     Profile.clear()
     start = now(localzone())
     Profile.@profile f()
     finish = now(localzone())
     
     path = "profile-$(now()).pb.gz"
+    @info "finished CPU profile. wrote to" path
     try
         pprof(; web=false, out=path)
         upload(config, SerializedProfile(start, finish, "cpu", path))

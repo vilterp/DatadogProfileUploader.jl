@@ -6,8 +6,8 @@ function myfunc()
 end
 
 tags = Dict(
-  "service" => "julia-sorter-3",
-  "version" => "abc123",
+  "service" => "julia-sorter-4",
+  "version" => "abc124",
   "env" => "dev",
 )
 
@@ -34,4 +34,4 @@ agent_config = DatadogProfileUploader.DDConfig(
   tags=tags,
 )
 
-DatadogProfileUploader.upload_file_on_disk(agent_config, "./cpu.pprof")
+DatadogProfileUploader.profile_and_upload(agent_config, myfunc)
