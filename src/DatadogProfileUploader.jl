@@ -51,7 +51,7 @@ end
 
 function upload(config::DDConfig, profile::SerializedProfile)
     headers = []
-    if config.api_key != nothing
+    if config.api_key !== nothing
         push!(headers, "DD-API-KEY" => config.api_key)
     end
     # do HTTP request
@@ -76,9 +76,8 @@ function upload(config::DDConfig, profile::SerializedProfile)
     
     body = HTTP.Form(parts)
     url = "$(config.protocol)://$(config.host):$(config.port)$(config.path)"
-    println("posting to $url")
-    resp = HTTP.post(url, headers, body)
-    println("got response ", resp)
+    HTTP.post(url, headers, body)
+    return
 end
 
 end # module

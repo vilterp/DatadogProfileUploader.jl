@@ -39,4 +39,4 @@ agent_config = DatadogProfileUploader.DDConfig(
   tags=tags,
 )
 
-DatadogProfileUploader.profile_and_upload(agent_config, myfunc)
+DatadogProfileUploader.profile_and_upload(direct_config, myfunc)
